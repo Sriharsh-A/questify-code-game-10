@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -28,35 +29,59 @@ const RegisterPage = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    // Simple validation
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Passwords do not match",
+        description: "Please ensure both passwords match",
+        variant: "destructive",
+      });
       setIsLoading(false);
+      return;
+    }
+    
+    try {
+      // Register user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      // Create a record in our custom users table
+      const { error: userError } = await supabase
+        .from('users')
+        .insert([
+          { 
+            email: formData.email,
+            password: '*****', // We don't store the actual password in our table since Supabase Auth handles that
+            role: 'learner',
+          }
+        ]);
+
+      if (userError) throw userError;
+
+      toast({
+        title: "Registration successful",
+        description: "Welcome to Questify! Start your learning journey now.",
+      });
       
-      // Simple validation
-      if (formData.password !== formData.confirmPassword) {
-        toast({
-          title: "Passwords do not match",
-          description: "Please ensure both passwords match",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (formData.name && formData.email && formData.password) {
-        // In a real app, this would register the user with a backend
-        navigate("/");
-        toast({
-          title: "Registration successful",
-          description: "Welcome to Questify! Start your learning journey now.",
-        });
-      } else {
-        toast({
-          title: "Registration failed",
-          description: "Please fill out all fields and try again.",
-          variant: "destructive",
-        });
-      }
-    }, 1000);
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Please check your information and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

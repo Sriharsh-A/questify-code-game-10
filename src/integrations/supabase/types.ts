@@ -9,7 +9,216 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      badges: {
+        Row: {
+          created_at: string | null
+          icon_url: string | null
+          id: string
+          name: string
+          unlock_criteria: number
+        }
+        Insert: {
+          created_at?: string | null
+          icon_url?: string | null
+          id?: string
+          name: string
+          unlock_criteria: number
+        }
+        Update: {
+          created_at?: string | null
+          icon_url?: string | null
+          id?: string
+          name?: string
+          unlock_criteria?: number
+        }
+        Relationships: []
+      }
+      leaderboards: {
+        Row: {
+          id: string
+          user_id: string | null
+          week_start_date: string
+          xp: number | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          week_start_date: string
+          xp?: number | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          week_start_date?: string
+          xp?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaderboards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      missions: {
+        Row: {
+          created_at: string | null
+          difficulty: string | null
+          id: string
+          skill_track_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          difficulty?: string | null
+          id?: string
+          skill_track_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          difficulty?: string | null
+          id?: string
+          skill_track_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missions_skill_track_id_fkey"
+            columns: ["skill_track_id"]
+            isOneToOne: false
+            referencedRelation: "skill_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          correct_answer: string
+          created_at: string | null
+          id: string
+          mission_id: string | null
+          options: Json
+          question_text: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string | null
+          id?: string
+          mission_id?: string | null
+          options: Json
+          question_text: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string | null
+          id?: string
+          mission_id?: string | null
+          options?: Json
+          question_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_tracks: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      user_missions: {
+        Row: {
+          completed_at: string | null
+          id: string
+          mission_id: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          mission_id?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          mission_id?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_missions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_missions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          password: string
+          role: string | null
+          streak_count: number | null
+          xp_points: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          password: string
+          role?: string | null
+          streak_count?: number | null
+          xp_points?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          password?: string
+          role?: string | null
+          streak_count?: number | null
+          xp_points?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

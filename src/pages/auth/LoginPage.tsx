@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -26,34 +27,47 @@ const LoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // Simple validation
-      if (formData.email && formData.password) {
-        // In a real app, this would check credentials against a backend
-        
-        // For demo, we'll allow admin login to access admin pages
-        if (formData.email === "admin@questify.com" && formData.password === "admin") {
-          navigate("/admin");
-        } else {
-          // Regular user login
-          navigate("/");
-        }
-        
-        toast({
-          title: "Logged in successfully",
-          description: "Welcome back to Questify!",
-        });
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Please check your credentials and try again.",
-          variant: "destructive",
-        });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        throw error;
       }
-    }, 1000);
+
+      // Check if user is admin
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('email', formData.email)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+      }
+
+      toast({
+        title: "Logged in successfully",
+        description: "Welcome back to Questify!",
+      });
+
+      // Navigate based on user role
+      if (userData && userData.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
